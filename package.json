@@ -1,0 +1,27 @@
+{
+  "name": "debugger",
+  "version": "1.0.0",
+  "description": "a small debugger for web in Native App",
+  "main": "index.js",
+  "scripts": {
+    "dev": "webpack-dev-server -d --content-base dist/ --hot --progress --colors --port 7777"
+  },
+  "devDependencies": {
+    "babel-core": "^6.9.0",
+    "babel-loader": "^6.2.4",
+    "babel-preset-es2015": "^6.9.0",
+    "html-webpack-plugin": "^2.22.0",
+    "webpack": "^1.12.14",
+    "webpack-dev-server": "^1.14.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zyf394/debugger.git"
+  },
+  "author": "shuiyi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zyf394/debugger/issues"
+  },
+  "homepage": "https://github.com/zyf394/debugger#readme"
+}
