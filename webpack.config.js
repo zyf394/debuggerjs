@@ -6,7 +6,7 @@ console.log(path.resolve(__dirname,'../../','./common/js'));
 
 module.exports = {
     entry: {
-        debugger: "./src/debugger.js",
+        debugger: ["./src/debugger.js"],
         test:"./test/test.js"
     },
     output: {
@@ -38,11 +38,7 @@ module.exports = {
         title: 'debbger',
         template: './test/index.html',
         filename: './index.html',
-        inject: true,
-        minify: {
-            removeComments: true,
-            collapseWhitespace: true
-        },
+        inject: 'head',
         chunks: ["debugger","test"]
     })
     ]
