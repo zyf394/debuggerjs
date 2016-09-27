@@ -3,38 +3,49 @@
  */
 
 require('./reset.css');
-import  {Debugger} from '../src/debugger'
 
+import  {Debugger} from '../src/debugger'
 document.onclick = function(){
     alert(a)
 }
-setTimeout(function(){
-
-
-},1000);
 
 function loadErrorScript() {
     var script = document.createElement('script');
     script.src = '/kkk.js';
-    script.onerror = function () {
-        throw Error(arguments)
+    script.onerror = function (error) {
+        Debugger.log(error)
     };
     document.body.appendChild(script);
 }
-
+function loadErrorLink(){
+    var link = document.createElement('link');
+    link.href = '/kkk.css';
+    link.rel = 'stylesheet';
+    link.onerror = function(error){
+        console.log(error);
+        Debugger.log(error)
+    };
+    document.head.appendChild(link);
+}
 
 function ajax(opt){
     var xhr = new XMLHttpRequest();
-    xhr.open(opt.type,opt.url,opt.async);
-    if((xhr.status >= 200 && xhr.status < 300) || xhr.status == 304){
-        opt.success(xhr.response);
-    }else {
-        opt.error(xhr.response)
-    }
+    xhr.open(opt.type, opt.url, opt.async);
+    xhr.onload = function(res) {
+        if(this.status == 200||this.status == 304){
+            opt.success(res);
+        }
+    };
+    xhr.onerror = function(error) {
+        opt.error(error)
+    };
     xhr.send();
 }
-
 window.onload = function () {
+    Debugger.init();
+    Debugger.log('Debugger begins.');
+    loadErrorScript();
+    loadErrorLink();
     $.ajax({
         type:'get',
         url:'http://static.galileo.xiaojukeji.com/static/tms/api/poisearch.json',
@@ -45,5 +56,5 @@ window.onload = function () {
         error:function(err){
             Debugger.log(err)
         }
-    });
+    })
 };

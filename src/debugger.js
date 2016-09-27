@@ -2,33 +2,31 @@
  * Created by didi on 16/9/21.
  */
 
+import styles from './debugger.less';
 
 class DebuggerInstance {
     constructor(error) {
-        debugger;
         this.error = {};
         this.style = {};
         this.instance = null;
 
         this.getErrorObj(error);
-        this.getCssStyle();
         this.create();
     }
 
     create() {
         let me = this;
         let error = me.error;
-        let style = me.style;
         let timeStamp = +new Date();
 
         let content = `
-            <div style="${style.content}">${error.message}
-                <span style="${style.closeBtn}" debugger-event="destroy">X</span>
+            <div >${error.message}
+                <span debugger-event="destroy"></span>
             </div>
             `;
         let alertBox = document.createElement('div');
         alertBox.id = 'debugger-' + timeStamp;
-        alertBox.style = style.wrap;
+        alertBox.className = styles.debugger;
         alertBox.innerHTML = content;
         alertBox.onclick = function (event) {
             let target = event.target;
@@ -41,17 +39,18 @@ class DebuggerInstance {
         me.instance = alertBox;
 
         document.body.appendChild(alertBox);
-
-        setTimeout(me.destroy.bind(me), 5000);
     }
 
     destroy() {
         let me = this;
-        me.blur()
+        let instance = me.instance;
+        instance && instance.parentNode && instance.parentNode.removeChild(instance);
+
+        /*me.blur()
             .then(function () {
                 let instance = me.instance;
                 instance && instance.parentNode && instance.parentNode.removeChild(instance);
-            })
+            })*/
     }
 
     blur() {
@@ -73,42 +72,7 @@ class DebuggerInstance {
     }
 
     getErrorObj(arg) {
-        let {message, filename, lineno, colno, error} = arg;
-        this.error = {message, filename, lineno, colno, error};
-    }
-
-    getCssStyle() {
-        let style = {
-            wrap: {
-                position: 'relative',
-                opacity: 1
-            },
-            content: {
-                background: 'rgba(0,0,0,0.6)',
-                fontSize: '20px',
-                color: '#fff',
-                lineHeight: 1.2,
-                padding: '0.5rem 10% 0.5rem 0.5rem'
-            },
-            text: {
-                color: 'red'
-            },
-            closeBtn: {
-                position: 'absolute',
-                top: '.2rem',
-                right: '.2rem',
-                fontSize: '2rem',
-                background: '#f0f0f0',
-                padding: '0 0.4rem',
-                color: 'rgba(0,0,0,0.6)'
-            }
-        };
-
-        for (let key in style) {
-            style[key] = this.compileToCss(style[key])
-        }
-
-        this.style = style;
+        this.error = arg;
     }
 
     compileToCss(obj) {
@@ -123,7 +87,7 @@ class DebuggerInstance {
     }
 }
 
-export var Debugger = {
+export const Debugger = {
     init() {
         this.listenScriptError();
     },
@@ -134,9 +98,43 @@ export var Debugger = {
         });
     },
     log(error){
-        new DebuggerInstance(error);
+        if(this.isEvent(error)){
+            var target = error.target;
+            error.message = "Resource Error: can't get " + (target.src || target.href) + ".";
+            new DebuggerInstance(error);
+        }else if(this.isErrorEvent(error)){
+            new DebuggerInstance(error[0]);
+        }else if(this.isProgressEvent(error)){
+            new DebuggerInstance(error[0]);
+        }else if(this.isXHR(error)){
+            error.message = "AJAX Error: XMLHttpRequest failed. Did you use $.ajax? the Debugger can't get more detail from error callback. Please check your $.ajax settings."
+            new DebuggerInstance(error);
+        }else if(this.isString(error)){
+            new DebuggerInstance({message: error});
+        }else if(this.isUndefined(error)){
+            error.message = "Params Error: Debugger.log(...) must have 1 param in it, but found none";
+            new DebuggerInstance(error);
+        }else{
+            error.message = "Unknown Error.";
+            new DebuggerInstance(error);        }
+    },
+    isEvent(error){
+        return error.constructor === Event;
+    },
+    isErrorEvent(error){
+        return error.constructor === ErrorEvent;
+    },
+    isProgressEvent(error){
+        return error.constructor === ProgressEvent;
+    },
+    isXHR(error){
+        return error.constructor === XMLHttpRequest;
+    },
+    isString(error){
+        return Object.prototype.toString.call(error) === "[object String]"
+    },
+    isUndefined(){
+        return Object.prototype.toString.call(error) === "[object Undefined]"
     }
 
 };
-
-Debugger.init();

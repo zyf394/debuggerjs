@@ -1,13 +1,12 @@
 var webpack = require('webpack');
 var path = require('path');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
-var WebpackDevServer = require('webpack-dev-server');
-console.log(path.resolve(__dirname,'../../','./common/js'));
 
 module.exports = {
     entry: {
         debugger: ["./src/debugger.js"],
-        test:"./test/test.js"
+        test:"./test/test.js",
+        zepto:"./test/zepto.js"
     },
     output: {
         path: "./dist/",
@@ -21,7 +20,7 @@ module.exports = {
             },
             {
                 test: /\.less$/,
-                loader: 'style-loader!css-loader!less-loader'
+                loader: 'style-loader!css-loader?modules&localIdentName=[name]-[hash:base64:5]!less-loader'
             },
             {
                 test: /\.js$/,
@@ -38,7 +37,7 @@ module.exports = {
         title: 'debbger',
         template: './test/index.html',
         filename: './index.html',
-        inject: 'head',
+        inject: true,
         chunks: ["debugger","test"]
     })
     ]
