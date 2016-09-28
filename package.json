@@ -4,7 +4,8 @@
   "description": "a small debugger for web in Native App",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack-dev-server -d --content-base dist/ --hot --progress --colors --port 7777"
+    "dev": "webpack-dev-server -d --content-base dist/ --hot --progress --colors --port 7777",
+    "build": "webpack -p --config webpack.config.prd.js"
   },
   "devDependencies": {
     "babel-core": "^6.9.0",
