@@ -116,7 +116,8 @@ export const Debugger = {
             new DebuggerInstance(error);
         }else{
             error.message = "Unknown Error.";
-            new DebuggerInstance(error);        }
+            new DebuggerInstance(error);
+        }
     },
     isEvent(error){
         return error.constructor === Event;
