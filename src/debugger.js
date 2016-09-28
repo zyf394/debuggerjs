@@ -93,8 +93,9 @@ export const Debugger = {
     },
 
     listenScriptError(){
+        let me = this;
         window.addEventListener('error', function () {
-            new DebuggerInstance(arguments[0]);
+            me.log(arguments[0])
         });
     },
     log(error){
