@@ -1,8 +1,8 @@
-# Debugger.js
+# debuggerjs
 
 a small debugger for web in Native App
 
-## Why we need Debugger.js?
+## Why we need debuggerjs?
 As we known, when developing something in App, we always can't get the error message if something wrong has happened. 
 Meanwhile, if we have a tool showing the errors in the App web view, that would help us a lot to debug.
 So this is what I've done.
