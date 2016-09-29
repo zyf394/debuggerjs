@@ -1,14 +1,18 @@
 var webpack = require('webpack');
 var path = require('path');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
+var argv = process.argv;
+var isUglify = argv.some(function(item, index){
+    return item === '-p'
+});
+var outputFileName = isUglify ? "/[name].min.js" : "/[name].js";
 
 module.exports = {
     entry: {
-        debugger: "./src/debugger.js"
+        debuggerjs: "./src/debuggerjs.js"
     },
     output: {
-        path: "./dist/",
-        filename: "/[name].min.js"
+        path: "./",
+        filename: outputFileName
     },
     module: {
         loaders: [

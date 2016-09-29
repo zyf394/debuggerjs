@@ -4,7 +4,7 @@
 
 require('./reset.css');
 
-import  {Debugger} from '../src/debugger'
+import  {Debugger} from '../src/debuggerjs'
 document.onclick = function(){
     alert(a)
 }

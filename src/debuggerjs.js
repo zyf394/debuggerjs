@@ -2,7 +2,7 @@
  * Created by didi on 16/9/21.
  */
 
-import styles from './debugger.less';
+import styles from './debuggerjs.less';
 
 class DebuggerInstance {
     constructor(error) {
@@ -104,9 +104,9 @@ export const Debugger = {
             error.message = "Resource Error: can't get " + (target.src || target.href) + ".";
             new DebuggerInstance(error);
         }else if(this.isErrorEvent(error)){
-            new DebuggerInstance(error[0]);
+            new DebuggerInstance(error);
         }else if(this.isProgressEvent(error)){
-            new DebuggerInstance(error[0]);
+            new DebuggerInstance(error);
         }else if(this.isXHR(error)){
             error.message = "AJAX Error: XMLHttpRequest failed. Did you use $.ajax? the Debugger can't get more detail from error callback. Please check your $.ajax settings."
             new DebuggerInstance(error);
@@ -135,7 +135,7 @@ export const Debugger = {
     isString(error){
         return Object.prototype.toString.call(error) === "[object String]"
     },
-    isUndefined(){
+    isUndefined(error){
         return Object.prototype.toString.call(error) === "[object Undefined]"
     }
 

@@ -4,7 +4,7 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     entry: {
-        debugger: ["./src/debugger.js"],
+        debuggerjs: ["./src/debuggerjs.js"],
         test:"./test/test.js",
         zepto:"./test/zepto.js"
     },
@@ -38,7 +38,7 @@ module.exports = {
         template: './test/index.html',
         filename: './index.html',
         inject: true,
-        chunks: ["debugger","test"]
+        chunks: ["debuggerjs","test"]
     })
     ]
 };
