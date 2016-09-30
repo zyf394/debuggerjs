@@ -1,10 +1,6 @@
 /**
  * Created by didi on 16/9/23.
  */
-(function (e) {
-    e.setAttribute("src", "http://172.26.11.24:1234/target/target-script-min.js#anonymous");
-    document.getElementsByTagName("body")[0].appendChild(e);
-})(document.createElement("script"));
 
 require('./reset.css');
 
@@ -12,7 +8,11 @@ import  {Debugger} from '../src/debuggerjs'
 document.addEventListener('touchend',function (e) {
     alert(a);
 });
-
+try{
+    console.log(i)
+}catch(err) {
+    Debugger.log(err)
+}
 function loadErrorScript() {
     var script = document.createElement('script');
     script.src = '/kkk.js';
@@ -31,7 +31,19 @@ function loadErrorLink() {
     };
     document.head.appendChild(link);
 }
-
+function loadErrorAjax() {
+    $.ajax({
+        type: 'get',
+        url: 'http://static.galileo.xiaojukeji.com/static/tms/api/poiasearch.json',
+        dataType: 'json',
+        success: function (res) {
+            alert(res)
+        },
+        error: function (err) {
+            Debugger.log(err)
+        }
+    })
+}
 function ajax(opt) {
     var xhr = new XMLHttpRequest();
     xhr.open(opt.type, opt.url, opt.async);
@@ -50,15 +62,5 @@ window.onload = function () {
     Debugger.log('Debugger begins.');
     loadErrorScript();
     loadErrorLink();
-    $.ajax({
-        type: 'get',
-        url: 'http://static.galileo.xiaojukeji.com/static/tms/api/poisearch.json',
-        dataType: 'json',
-        success: function (res) {
-            alert(res)
-        },
-        error: function (err) {
-            Debugger.log(err)
-        }
-    })
+    setTimeout(loadErrorAjax,3000);
 };

@@ -38,7 +38,7 @@ module.exports = {
         template: './test/index.html',
         filename: './index.html',
         inject: true,
-        chunks: ["debuggerjs","test"]
+        chunks: ["debuggerjs","test","zepto"]
     })
     ]
 };

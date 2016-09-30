@@ -21,7 +21,7 @@ class DebuggerInstance {
         let timeStamp = +new Date();
 
         let content = `
-            <div >err${count}: ${error.message}</div>
+            <div >err${count}: ${error.message}<br/>location: ${error.location}</div>
             `;
         let alertBox = document.createElement('div');
         alertBox.id = 'debugger-' + timeStamp;
@@ -36,7 +36,7 @@ class DebuggerInstance {
 
         setTimeout(function () {
             me.destroy();
-        }, 5000)
+        }, 10000)
     }
 
     destroy() {
@@ -102,26 +102,88 @@ export const Debugger = {
         });
     },
     log(error){
-        if (this.isEvent(error)) {
-            var target = error.target;
-            error.message = "Resource Error: can't get " + (target.src || target.href) + ".";
+
+        let me = this;
+
+        if (me.isError(error)) {
+
+            error.message = me.getStackMessage(error.stack);
+            error.location = me.getStackLocation(error.stack);
             new DebuggerInstance(error);
-        } else if (this.isErrorEvent(error)) {
+
+        }else if (me.isEvent(error)) {
+            me.throwError()
+                .then(e =>{
+                    var target = error.target;
+                    error.message = "Resource Error: can't get " + (target.src || target.href) + ".";
+                    error.location = me.getStackLocation(e.stack);
+                    new DebuggerInstance(error);
+                });
+
+
+        } else if (me.isErrorEvent(error)) {
+
+            error.location = me.getStackLocation(error.error.stack);
             new DebuggerInstance(error);
-        } else if (this.isProgressEvent(error)) {
-            new DebuggerInstance(error);
-        } else if (this.isXHR(error)) {
-            error.message = "AJAX Error: XMLHttpRequest failed. Did you use $.ajax? the Debugger can't get more detail from error callback. Please check your $.ajax settings."
-            new DebuggerInstance(error);
-        } else if (this.isString(error)) {
-            new DebuggerInstance({message: error});
-        } else if (this.isUndefined(error)) {
-            error.message = "Params Error: Debugger.log(...) must have 1 param in it, but found none";
-            new DebuggerInstance(error);
+
+        } else if (me.isXHR(error)) {
+
+            me.throwError()
+                .then(e =>{
+                    error.message = "AJAX Error: XMLHttpRequest failed. Did you use $.ajax? the Debugger can't get more detail from error callback. Please check your $.ajax settings."
+                    error.location = me.getStackLocation(e.stack);
+                    new DebuggerInstance(error);
+
+                })
+
+        } else if (me.isString(error)) {
+            me.throwError()
+                .then(e => {
+                    new DebuggerInstance({
+                        message: error,
+                        location:me.getStackLocation(e.stack)});
+                })
+
+        } else if (me.isUndefined(error)) {
+            me.throwError()
+                .then(e =>{
+                    error.message = "Params Error: Debugger.log(...) must have 1 param in it, but found none";
+                    error.location = me.getStackLocation(e.stack);
+                    new DebuggerInstance(error);
+
+                });
         } else {
-            error.message = "Unknown Error.";
-            new DebuggerInstance(error);
+            me.throwError()
+                .then(e =>{
+                    error.message = "Unknown Error.";
+                    error.location = me.getStackLocation(e.stack);
+                    new DebuggerInstance(error);
+
+                });
+
         }
+    },
+    throwError(){
+        return new Promise(function (res, rej) {
+            try {
+                throw new Error();
+            }catch (e) {
+                res(e)
+            }
+        })
+
+    },
+    getStackMessage(stack){
+        let stackArr = stack.split(/\n+/);
+        return stackArr[0].replace(/(^\s+|\s+$)/,"");
+    },
+    getStackLocation(stack){
+        console.log(stack);
+        let stackArr = stack.split(/\n+/);
+        return stackArr[stackArr.length - 1].replace(/(^\s+|\s+$)/,"");
+    },
+    isError(error){
+        return error instanceof Error;
     },
     isEvent(error){
         return error.constructor === Event;
