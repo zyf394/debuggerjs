@@ -5,7 +5,7 @@
 require('./reset.css');
 
 import  {Debugger} from '../src/debuggerjs'
-document.addEventListener('touchend',function (e) {
+document.addEventListener('click',function (e) {
     alert(a);
 });
 try{
@@ -32,9 +32,9 @@ function loadErrorLink() {
     document.head.appendChild(link);
 }
 function loadErrorAjax() {
-    $.ajax({
+    ajax({
         type: 'get',
-        url: 'http://static.galileo.xiaojukeji.com/static/tms/api/poiasearch.json',
+        url: 'http://static.galileo.xiaojukeji.com/static/tms/api/poisearch.json',
         dataType: 'json',
         success: function (res) {
             alert(res)
@@ -53,6 +53,7 @@ function ajax(opt) {
         }
     };
     xhr.onerror = function (error) {
+        debugger;
         opt.error(error)
     };
     xhr.send();
