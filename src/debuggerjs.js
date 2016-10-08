@@ -3,6 +3,7 @@
  */
 
 import styles from './debuggerjs.less';
+import 'whatwg-fetch';
 
 class DebuggerInstance {
     constructor(error) {
@@ -11,6 +12,7 @@ class DebuggerInstance {
         this.instance = null;
 
         this.getErrorObj(error);
+        this.sendErrorData(error);
         this.create();
     }
 
@@ -70,7 +72,20 @@ class DebuggerInstance {
     getErrorObj(arg) {
         this.error = arg;
     }
+    sendErrorData(error){
+        if(!error.needReport) return;
 
+        const url = error.url;
+        const type = error.type;
+        fetch(url, {
+            method: type,
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(error)
+        })
+    }
     getCssValue(target, attr) {
         return window.getComputedStyle(target)[attr]
     }
@@ -91,7 +106,12 @@ export const Debugger = {
 
     errorCount: 1,
 
-    init() {
+    confData:{},
+    
+    init(options) {
+        if(options){
+            this.confData = options
+        }
         this.listenScriptError();
     },
 
@@ -104,6 +124,8 @@ export const Debugger = {
     log(error){
 
         let me = this;
+
+        error = Object.assign(error, me.confData);
 
         if (me.isError(error)) {
 
@@ -158,10 +180,9 @@ export const Debugger = {
                     error.message = "Unknown Error.";
                     error.location = me.getStackLocation(e.stack);
                     new DebuggerInstance(error);
-
                 });
-
         }
+
     },
     throwError(){
         return new Promise(function (res, rej) {

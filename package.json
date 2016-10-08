@@ -31,5 +31,8 @@
   "bugs": {
     "url": "https://github.com/zyf394/debugger/issues"
   },
-  "homepage": "https://github.com/zyf394/debugger#readme"
+  "homepage": "https://github.com/zyf394/debugger#readme",
+  "dependencies": {
+    "whatwg-fetch": "^1.0.0"
+  }
 }

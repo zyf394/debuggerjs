@@ -4,13 +4,13 @@
 
 require('./reset.css');
 
-import  {Debugger} from 'debuggerjs'
-document.addEventListener('click',function (e) {
+import  {Debugger} from '../src/debuggerjs'
+document.addEventListener('click', function (e) {
     alert(a);
 });
-try{
+try {
     console.log(i)
-}catch(err) {
+} catch (err) {
     Debugger.log(err)
 }
 function loadErrorScript() {
@@ -59,9 +59,13 @@ function ajax(opt) {
     xhr.send();
 }
 window.onload = function () {
-    Debugger.init();
+    Debugger.init({
+        needReport: true,
+        type: 'post',
+        url: 'http://localhost:3000/add'
+    });
     Debugger.log('Debugger begins.');
     loadErrorScript();
     loadErrorLink();
-    setTimeout(loadErrorAjax,3000);
+    setTimeout(loadErrorAjax, 3000);
 };
