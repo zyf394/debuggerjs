@@ -4,7 +4,7 @@
 
 require('./reset.css');
 
-import  {Debugger} from '../src/debuggerjs'
+import  {Debugger} from 'debuggerjs'
 document.addEventListener('click',function (e) {
     alert(a);
 });

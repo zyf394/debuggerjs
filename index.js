@@ -80,48 +80,45 @@
 	        value: function create() {
 	            var me = this;
 	            var error = me.error;
+	            var count = Debugger.errorCount;
 	            var timeStamp = +new Date();
 
-	            var content = '\n            <div >' + error.message + '\n                <span debugger-event="destroy"></span>\n            </div>\n            ';
+	            var content = '\n            <div >err' + count + ': ' + error.message + '<br/>location: ' + error.location + '</div>\n            ';
 	            var alertBox = document.createElement('div');
 	            alertBox.id = 'debugger-' + timeStamp;
 	            alertBox.className = _debuggerjs2.default.debugger;
 	            alertBox.innerHTML = content;
-	            alertBox.onclick = function (event) {
-	                var target = event.target;
-	                if (target.getAttribute('debugger-event') === 'destroy') {
-	                    me.destroy();
-	                }
-	                event.stopPropagation(); // prevent click events trigger on other elements again
-	            };
 
 	            me.instance = alertBox;
 
 	            document.body.appendChild(alertBox);
+
+	            Debugger.errorCount++;
+
+	            setTimeout(function () {
+	                me.destroy();
+	            }, 10000);
 	        }
 	    }, {
 	        key: 'destroy',
 	        value: function destroy() {
 	            var me = this;
-	            var instance = me.instance;
-	            instance && instance.parentNode && instance.parentNode.removeChild(instance);
-
-	            /*me.blur()
-	                .then(function () {
-	                    let instance = me.instance;
-	                    instance && instance.parentNode && instance.parentNode.removeChild(instance);
-	                })*/
+	            me.blur().then(function () {
+	                var instance = me.instance;
+	                instance && instance.parentNode && instance.parentNode.removeChild(instance);
+	            });
 	        }
 	    }, {
 	        key: 'blur',
 	        value: function blur() {
-	            var instance = this.instance,
+	            var me = this,
+	                instance = this.instance,
 	                timer = null;
 
 	            return new Promise(function (res, rej) {
 	                timer = setInterval(function () {
-	                    var opacity = instance.style.opacity;
-	                    if (opacity == 0) {
+	                    var opacity = me.getCssValue(instance, 'opacity');
+	                    if (opacity < 0.1) {
 	                        clearTimeout(timer);
 	                        res();
 	                    } else {
@@ -134,6 +131,11 @@
 	        key: 'getErrorObj',
 	        value: function getErrorObj(arg) {
 	            this.error = arg;
+	        }
+	    }, {
+	        key: 'getCssValue',
+	        value: function getCssValue(target, attr) {
+	            return window.getComputedStyle(target)[attr];
 	        }
 	    }, {
 	        key: 'compileToCss',
@@ -153,6 +155,9 @@
 	}();
 
 	var Debugger = exports.Debugger = {
+
+	    errorCount: 1,
+
 	    init: function init() {
 	        this.listenScriptError();
 	    },
@@ -163,26 +168,72 @@
 	        });
 	    },
 	    log: function log(error) {
-	        if (this.isEvent(error)) {
-	            var target = error.target;
-	            error.message = "Resource Error: can't get " + (target.src || target.href) + ".";
+
+	        var me = this;
+
+	        if (me.isError(error)) {
+
+	            error.message = me.getStackMessage(error.stack);
+	            error.location = me.getStackLocation(error.stack);
 	            new DebuggerInstance(error);
-	        } else if (this.isErrorEvent(error)) {
+	        } else if (me.isEvent(error)) {
+	            me.throwError().then(function (e) {
+	                var target = error.target;
+	                error.message = "Resource Error: can't get " + (target.src || target.href) + ".";
+	                error.location = me.getStackLocation(e.stack);
+	                new DebuggerInstance(error);
+	            });
+	        } else if (me.isErrorEvent(error)) {
+
+	            error.location = me.getStackLocation(error.error.stack);
 	            new DebuggerInstance(error);
-	        } else if (this.isProgressEvent(error)) {
-	            new DebuggerInstance(error);
-	        } else if (this.isXHR(error)) {
-	            error.message = "AJAX Error: XMLHttpRequest failed. Did you use $.ajax? the Debugger can't get more detail from error callback. Please check your $.ajax settings.";
-	            new DebuggerInstance(error);
-	        } else if (this.isString(error)) {
-	            new DebuggerInstance({ message: error });
-	        } else if (this.isUndefined(error)) {
-	            error.message = "Params Error: Debugger.log(...) must have 1 param in it, but found none";
-	            new DebuggerInstance(error);
+	        } else if (me.isXHR(error)) {
+
+	            me.throwError().then(function (e) {
+	                error.message = "AJAX Error: XMLHttpRequest failed. Did you use $.ajax? the Debugger can't get more detail from error callback. Please check your $.ajax settings.";
+	                error.location = me.getStackLocation(e.stack);
+	                new DebuggerInstance(error);
+	            });
+	        } else if (me.isString(error)) {
+	            me.throwError().then(function (e) {
+	                new DebuggerInstance({
+	                    message: error,
+	                    location: me.getStackLocation(e.stack) });
+	            });
+	        } else if (me.isUndefined(error)) {
+	            me.throwError().then(function (e) {
+	                error.message = "Params Error: Debugger.log(...) must have 1 param in it, but found none";
+	                error.location = me.getStackLocation(e.stack);
+	                new DebuggerInstance(error);
+	            });
 	        } else {
-	            error.message = "Unknown Error.";
-	            new DebuggerInstance(error);
+	            me.throwError().then(function (e) {
+	                error.message = "Unknown Error.";
+	                error.location = me.getStackLocation(e.stack);
+	                new DebuggerInstance(error);
+	            });
 	        }
+	    },
+	    throwError: function throwError() {
+	        return new Promise(function (res, rej) {
+	            try {
+	                throw new Error();
+	            } catch (e) {
+	                res(e);
+	            }
+	        });
+	    },
+	    getStackMessage: function getStackMessage(stack) {
+	        var stackArr = stack.split(/\n+/);
+	        return stackArr[0].replace(/(^\s+|\s+$)/, "");
+	    },
+	    getStackLocation: function getStackLocation(stack) {
+	        console.log(stack);
+	        var stackArr = stack.split(/\n+/);
+	        return stackArr[stackArr.length - 1].replace(/(^\s+|\s+$)/, "");
+	    },
+	    isError: function isError(error) {
+	        return error instanceof Error;
 	    },
 	    isEvent: function isEvent(error) {
 	        return error.constructor === Event;
@@ -239,7 +290,7 @@
 
 
 	// module
-	exports.push([module.id, ".debuggerjs-3zzvy {\n  position: relative;\n  opacity: 1;\n  word-wrap: break-word;\n}\n.debuggerjs-3zzvy div {\n  background: rgba(0, 0, 0, 0.6);\n  font-size: 0.1rem;\n  color: #fff;\n  line-height: 1.2;\n  padding: 0.5rem 10% 0.5rem 0.5rem;\n}\n.debuggerjs-3zzvy div span {\n  position: absolute;\n  top: .2rem;\n  right: .2rem;\n  font-size: 2rem;\n  width: 12px;\n  height: 24px;\n  background: #f0f0f0;\n  padding: 0 0.4rem;\n  color: rgba(0, 0, 0, 0.6);\n}\n.debuggerjs-3zzvy div span::before,\n.debuggerjs-3zzvy div span::after {\n  content: '';\n  position: absolute;\n  height: 2px;\n  width: 100%;\n  top: 50%;\n  left: 0;\n  margin-top: -1px;\n  background: #000;\n}\n.debuggerjs-3zzvy div span::before {\n  -webkit-transform: rotate(45deg);\n  -moz-transform: rotate(45deg);\n  -ms-transform: rotate(45deg);\n  -o-transform: rotate(45deg);\n  transform: rotate(45deg);\n}\n.debuggerjs-3zzvy div span::after {\n  -webkit-transform: rotate(-45deg);\n  -moz-transform: rotate(-45deg);\n  -ms-transform: rotate(-45deg);\n  -o-transform: rotate(-45deg);\n  transform: rotate(-45deg);\n}\n", ""]);
+	exports.push([module.id, ".debuggerjs-3zzvy {\n  position: relative;\n  opacity: 1;\n  word-wrap: break-word;\n}\n.debuggerjs-3zzvy div {\n  background: rgba(0, 0, 0, 0.6);\n  font-size: 1rem;\n  color: #fff;\n  line-height: 1.2;\n  padding: 0.5rem 10% 0.5rem 0.5rem;\n  border-bottom: 1px solid #f0f0f0;\n}\n.debuggerjs-3zzvy div span {\n  position: absolute;\n  top: .2rem;\n  right: .2rem;\n  font-size: 2rem;\n  width: 12px;\n  height: 24px;\n  background: #f0f0f0;\n  padding: 0 0.4rem;\n  color: rgba(0, 0, 0, 0.6);\n}\n.debuggerjs-3zzvy div span::before,\n.debuggerjs-3zzvy div span::after {\n  content: '';\n  position: absolute;\n  height: 2px;\n  width: 100%;\n  top: 50%;\n  left: 0;\n  margin-top: -1px;\n  background: #000;\n}\n.debuggerjs-3zzvy div span::before {\n  -webkit-transform: rotate(45deg);\n  -moz-transform: rotate(45deg);\n  -ms-transform: rotate(45deg);\n  -o-transform: rotate(45deg);\n  transform: rotate(45deg);\n}\n.debuggerjs-3zzvy div span::after {\n  -webkit-transform: rotate(-45deg);\n  -moz-transform: rotate(-45deg);\n  -ms-transform: rotate(-45deg);\n  -o-transform: rotate(-45deg);\n  transform: rotate(-45deg);\n}\n", ""]);
 
 	// exports
 	exports.locals = {

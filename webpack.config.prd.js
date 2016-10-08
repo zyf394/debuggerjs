@@ -4,7 +4,7 @@ var argv = process.argv;
 var isUglify = argv.some(function(item, index){
     return item === '-p'
 });
-var outputFileName = isUglify ? "/[name].min.js" : "/[name].js";
+var outputFileName = isUglify ? "/[name].min.js" : "/index.js";
 
 module.exports = {
     entry: {
