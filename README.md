@@ -21,8 +21,8 @@ So this is what I've done.
         
 ## API
 
-#### debuger.init()
-use debuger.init() to listen all javascript code running error.
+#### debuger.init(options)
+use debuger.init(options) to listen all javascript code running error.
 
     import {debuger} from 'debuggerjs';
     debugger.init(options);
