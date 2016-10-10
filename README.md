@@ -27,13 +27,14 @@ use debuger.init() to listen all javascript code running error.
     import {debuger} from 'debuggerjs';
     debugger.init(options);
 
-options 
+**options** 
 
-| option | value | default |
+| key | value | default |
 | --- | --- | --- |
-| needShow | show errors on your device or not | true |
-| needReport | report errors to your service or not | false |
-| needShow | show errors on your device or not | true |
+| needShow | Boolean. Show errors on your device or not | true |
+| needReport | Boolean. Report errors to your server or not | false |
+| method | String. The way you send the error to server | 'post' |
+| url | String. The url you send the error to server | '' |
 
 
 #### debuger.log(error)
