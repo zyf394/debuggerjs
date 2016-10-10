@@ -3,25 +3,29 @@
  */
 
 import styles from './debuggerjs.less';
-import 'whatwg-fetch';
+import ajax from '@fdaciuk/ajax';
+import objectAssign from 'object-assign';
 
 class DebuggerInstance {
     constructor(error) {
-        this.error = {};
-        this.style = {};
         this.instance = null;
+        this.errLocation = {};
 
-        this.getErrorObj(error);
+
         this.sendErrorData(error);
-        this.create();
+        this.create(error);
     }
 
-    create() {
+    getDefaultData() {
+
+    }
+
+    create(error) {
         let me = this;
-        let error = me.error;
+        if (!error.needShow) return;
+
         let count = Debugger.errorCount;
         let timeStamp = +new Date();
-
         let content = `
             <div >err${count}: ${error.message}<br/>location: ${error.location}</div>
             `;
@@ -69,25 +73,54 @@ class DebuggerInstance {
 
     }
 
-    getErrorObj(arg) {
-        this.error = arg;
-    }
-    sendErrorData(error){
-        if(!error.needReport) return;
+    sendErrorData(error) {
+        if (!error.needReport) return;
 
         const url = error.url;
-        const type = error.type;
-        fetch(url, {
-            method: type,
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(error)
+        const method = error.method;
+
+        let errorObj = {
+            url: location.href,
+            ua: navigator.userAgent,
+            filename: error.filename || this.getFileName(error.location),
+            lineno: error.lineno || this.getLineNo(error.location),
+            colno: error.colno || this.getColNo(error.location),
+            message: error.message || '',
+            location: this.getLocation(error.location) || ''
+        };
+        ajax({
+            url: url,
+            method: method,
+            data: errorObj
         })
     }
+
     getCssValue(target, attr) {
         return window.getComputedStyle(target)[attr]
+    }
+
+    getFileName(location) {
+        return this.errLocation.filename ? this.errLocation.filename : this.splitLocation(location).filename
+    }
+
+    getLineNo(location) {
+        return this.errLocation.lineno ? this.errLocation.lineno : this.splitLocation(location).lineno
+    }
+
+    getColNo(location) {
+        return this.errLocation.colno ? this.errLocation.colno : this.splitLocation(location).colno
+    }
+
+    getLocation(location) {
+        return location.replace(/\s*(\(.*\))\s*/, '')
+    }
+
+    splitLocation(location) {
+        const rs = /^.*\((.*\.js):(\d*):(\d*)\)/.exec(location);
+        const RE = RegExp;
+        let [filename,lineno,colno] = [RE.$1, RE.$2, RE.$3];
+        this.locationObj = {filename, lineno, colno} // for cache
+        return this.locationObj
     }
 
     compileToCss(obj) {
@@ -106,11 +139,16 @@ export const Debugger = {
 
     errorCount: 1,
 
-    confData:{},
-    
+    confData: {
+        needShow: true,
+        needReport: false,
+        method: 'post',
+        url: ''
+    },
+
     init(options) {
-        if(options){
-            this.confData = options
+        if (options) {
+            this.confData = objectAssign(this.confData, options)
         }
         this.listenScriptError();
     },
@@ -125,7 +163,7 @@ export const Debugger = {
 
         let me = this;
 
-        error = Object.assign(error, me.confData);
+        error = objectAssign(error, me.confData);
 
         if (me.isError(error)) {
 
@@ -133,9 +171,9 @@ export const Debugger = {
             error.location = me.getStackLocation(error.stack);
             new DebuggerInstance(error);
 
-        }else if (me.isEvent(error)) {
+        } else if (me.isEvent(error)) {
             me.throwError()
-                .then(e =>{
+                .then(e => {
                     var target = error.target;
                     error.message = "Resource Error: can't get " + (target.src || target.href) + ".";
                     error.location = me.getStackLocation(e.stack);
@@ -151,7 +189,7 @@ export const Debugger = {
         } else if (me.isXHR(error)) {
 
             me.throwError()
-                .then(e =>{
+                .then(e => {
                     error.message = "AJAX Error: XMLHttpRequest failed. Did you use $.ajax? the Debugger can't get more detail from error callback. Please check your $.ajax settings."
                     error.location = me.getStackLocation(e.stack);
                     new DebuggerInstance(error);
@@ -163,12 +201,13 @@ export const Debugger = {
                 .then(e => {
                     new DebuggerInstance({
                         message: error,
-                        location:me.getStackLocation(e.stack)});
+                        location: me.getStackLocation(e.stack)
+                    });
                 })
 
         } else if (me.isUndefined(error)) {
             me.throwError()
-                .then(e =>{
+                .then(e => {
                     error.message = "Params Error: Debugger.log(...) must have 1 param in it, but found none";
                     error.location = me.getStackLocation(e.stack);
                     new DebuggerInstance(error);
@@ -176,19 +215,18 @@ export const Debugger = {
                 });
         } else {
             me.throwError()
-                .then(e =>{
+                .then(e => {
                     error.message = "Unknown Error.";
                     error.location = me.getStackLocation(e.stack);
                     new DebuggerInstance(error);
                 });
         }
-
     },
     throwError(){
         return new Promise(function (res, rej) {
             try {
                 throw new Error();
-            }catch (e) {
+            } catch (e) {
                 res(e)
             }
         })
@@ -196,12 +234,11 @@ export const Debugger = {
     },
     getStackMessage(stack){
         let stackArr = stack.split(/\n+/);
-        return stackArr[0].replace(/(^\s+|\s+$)/,"");
+        return stackArr[0].replace(/(^\s+|\s+$)/, "");
     },
     getStackLocation(stack){
-        console.log(stack);
         let stackArr = stack.split(/\n+/);
-        return stackArr[stackArr.length - 1].replace(/(^\s+|\s+$)/,"");
+        return stackArr[stackArr.length - 1].replace(/(^\s+|\s+$)/, "");
     },
     isError(error){
         return error instanceof Error;

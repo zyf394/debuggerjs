@@ -8,11 +8,7 @@ import  {Debugger} from '../src/debuggerjs'
 document.addEventListener('click', function (e) {
     alert(a);
 });
-try {
-    console.log(i)
-} catch (err) {
-    Debugger.log(err)
-}
+
 function loadErrorScript() {
     var script = document.createElement('script');
     script.src = '/kkk.js';
@@ -60,11 +56,17 @@ function ajax(opt) {
 }
 window.onload = function () {
     Debugger.init({
+        needShow: false,
         needReport: true,
-        type: 'post',
-        url: 'http://localhost:3000/add'
+        method: 'post',
+        url: 'http://127.0.0.1:3000/add'
     });
     Debugger.log('Debugger begins.');
+    try {
+        console.log(i)
+    } catch (err) {
+        Debugger.log(err)
+    }
     loadErrorScript();
     loadErrorLink();
     setTimeout(loadErrorAjax, 3000);

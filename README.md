@@ -25,8 +25,17 @@ So this is what I've done.
 use debuger.init() to listen all javascript code running error.
 
     import {debuger} from 'debuggerjs';
-    debugger.init();
-    
+    debugger.init(options);
+
+options 
+
+| option | value | default |
+| --- | --- | --- |
+| needShow | show errors on your device or not | true |
+| needReport | report errors to your service or not | false |
+| needShow | show errors on your device or not | true |
+
+
 #### debuger.log(error)
 or you can use debuger.log() to log errors manually. The only param could be a Error object or a String.
 

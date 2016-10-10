@@ -59,6 +59,14 @@
 
 	var _debuggerjs2 = _interopRequireDefault(_debuggerjs);
 
+	var _ajax = __webpack_require__(5);
+
+	var _ajax2 = _interopRequireDefault(_ajax);
+
+	var _objectAssign = __webpack_require__(6);
+
+	var _objectAssign2 = _interopRequireDefault(_objectAssign);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -67,22 +75,24 @@
 	    function DebuggerInstance(error) {
 	        _classCallCheck(this, DebuggerInstance);
 
-	        this.error = {};
-	        this.style = {};
 	        this.instance = null;
+	        this.errLocation = {};
 
-	        this.getErrorObj(error);
-	        this.create();
+	        this.sendErrorData(error);
+	        this.create(error);
 	    }
 
 	    _createClass(DebuggerInstance, [{
+	        key: 'getDefaultData',
+	        value: function getDefaultData() {}
+	    }, {
 	        key: 'create',
-	        value: function create() {
+	        value: function create(error) {
 	            var me = this;
-	            var error = me.error;
+	            if (!error.needShow) return;
+
 	            var count = Debugger.errorCount;
 	            var timeStamp = +new Date();
-
 	            var content = '\n            <div >err' + count + ': ' + error.message + '<br/>location: ' + error.location + '</div>\n            ';
 	            var alertBox = document.createElement('div');
 	            alertBox.id = 'debugger-' + timeStamp;
@@ -128,14 +138,64 @@
 	            });
 	        }
 	    }, {
-	        key: 'getErrorObj',
-	        value: function getErrorObj(arg) {
-	            this.error = arg;
+	        key: 'sendErrorData',
+	        value: function sendErrorData(error) {
+	            if (!error.needReport) return;
+
+	            var url = error.url;
+	            var method = error.method;
+
+	            var errorObj = {
+	                url: location.href,
+	                ua: navigator.userAgent,
+	                filename: error.filename || this.getFileName(error.location),
+	                lineno: error.lineno || this.getLineNo(error.location),
+	                colno: error.colno || this.getColNo(error.location),
+	                message: error.message || '',
+	                location: this.getLocation(error.location) || ''
+	            };
+	            (0, _ajax2.default)({
+	                url: url,
+	                method: method,
+	                data: errorObj
+	            });
 	        }
 	    }, {
 	        key: 'getCssValue',
 	        value: function getCssValue(target, attr) {
 	            return window.getComputedStyle(target)[attr];
+	        }
+	    }, {
+	        key: 'getFileName',
+	        value: function getFileName(location) {
+	            return this.errLocation.filename ? this.errLocation.filename : this.splitLocation(location).filename;
+	        }
+	    }, {
+	        key: 'getLineNo',
+	        value: function getLineNo(location) {
+	            return this.errLocation.lineno ? this.errLocation.lineno : this.splitLocation(location).lineno;
+	        }
+	    }, {
+	        key: 'getColNo',
+	        value: function getColNo(location) {
+	            return this.errLocation.colno ? this.errLocation.colno : this.splitLocation(location).colno;
+	        }
+	    }, {
+	        key: 'getLocation',
+	        value: function getLocation(location) {
+	            return location.replace(/\s*(\(.*\))\s*/, '');
+	        }
+	    }, {
+	        key: 'splitLocation',
+	        value: function splitLocation(location) {
+	            var rs = /^.*\((.*\.js):(\d*):(\d*)\)/.exec(location);
+	            var RE = RegExp;
+	            var filename = RE.$1;
+	            var lineno = RE.$2;
+	            var colno = RE.$3;
+
+	            this.locationObj = { filename: filename, lineno: lineno, colno: colno }; // for cache
+	            return this.locationObj;
 	        }
 	    }, {
 	        key: 'compileToCss',
@@ -158,7 +218,17 @@
 
 	    errorCount: 1,
 
-	    init: function init() {
+	    confData: {
+	        needShow: true,
+	        needReport: false,
+	        method: 'post',
+	        url: ''
+	    },
+
+	    init: function init(options) {
+	        if (options) {
+	            this.confData = (0, _objectAssign2.default)(this.confData, options);
+	        }
 	        this.listenScriptError();
 	    },
 	    listenScriptError: function listenScriptError() {
@@ -170,6 +240,8 @@
 	    log: function log(error) {
 
 	        var me = this;
+
+	        error = (0, _objectAssign2.default)(error, me.confData);
 
 	        if (me.isError(error)) {
 
@@ -198,7 +270,8 @@
 	            me.throwError().then(function (e) {
 	                new DebuggerInstance({
 	                    message: error,
-	                    location: me.getStackLocation(e.stack) });
+	                    location: me.getStackLocation(e.stack)
+	                });
 	            });
 	        } else if (me.isUndefined(error)) {
 	            me.throwError().then(function (e) {
@@ -228,7 +301,6 @@
 	        return stackArr[0].replace(/(^\s+|\s+$)/, "");
 	    },
 	    getStackLocation: function getStackLocation(stack) {
-	        console.log(stack);
 	        var stackArr = stack.split(/\n+/);
 	        return stackArr[stackArr.length - 1].replace(/(^\s+|\s+$)/, "");
 	    },
@@ -603,6 +675,109 @@
 		if(oldSrc)
 			URL.revokeObjectURL(oldSrc);
 	}
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/**!
+	 * ajax - v2.1.2
+	 * Ajax module in Vanilla JS
+	 * https://github.com/fdaciuk/ajax
+
+	 * Sun May 15 2016 12:45:49 GMT-0300 (BRT)
+	 * MIT (c) Fernando Daciuk
+	*/
+	!function(e,t){"use strict"; true?!(__WEBPACK_AMD_DEFINE_FACTORY__ = (t), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)):"object"==typeof exports?exports=module.exports=t():e.ajax=t()}(this,function(){"use strict";function e(e){var r=["get","post","put","delete"];return e=e||{},e.baseUrl=e.baseUrl||"",e.method&&e.url?n(e.method,e.baseUrl+e.url,t(e.data),e):r.reduce(function(r,u){return r[u]=function(r,o){return n(u,e.baseUrl+r,t(o),e)},r},{})}function t(e){return e||null}function n(e,t,n,u){var c=["then","catch","always"],s=c.reduce(function(e,t){return e[t]=function(n){return e[t]=n,e},e},{}),i=new XMLHttpRequest;return i.open(e,t,!0),r(i,u.headers),i.addEventListener("readystatechange",o(s,i),!1),i.send(a(n)),s.abort=function(){return i.abort()},s}function r(e,t){t=t||{},u(t)||(t["Content-Type"]="application/x-www-form-urlencoded"),Object.keys(t).forEach(function(n){t[n]&&e.setRequestHeader(n,t[n])})}function u(e){return Object.keys(e).some(function(e){return"content-type"===e.toLowerCase()})}function o(e,t){return function n(){t.readyState===t.DONE&&(t.removeEventListener("readystatechange",n,!1),e.always.apply(e,c(t)),t.status>=200&&t.status<300?e.then.apply(e,c(t)):e["catch"].apply(e,c(t)))}}function c(e){var t;try{t=JSON.parse(e.responseText)}catch(n){t=e.responseText}return[t,e]}function a(e){return s(e)?i(e):e}function s(e){return"[object Object]"===Object.prototype.toString.call(e)}function i(e){return Object.keys(e).reduce(function(t,n){var r=t?t+"&":"";return r+f(n)+"="+f(e[n])},"")}function f(e){return encodeURIComponent(e)}return e});
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	'use strict';
+	/* eslint-disable no-unused-vars */
+	var hasOwnProperty = Object.prototype.hasOwnProperty;
+	var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+
+	function toObject(val) {
+		if (val === null || val === undefined) {
+			throw new TypeError('Object.assign cannot be called with null or undefined');
+		}
+
+		return Object(val);
+	}
+
+	function shouldUseNative() {
+		try {
+			if (!Object.assign) {
+				return false;
+			}
+
+			// Detect buggy property enumeration order in older V8 versions.
+
+			// https://bugs.chromium.org/p/v8/issues/detail?id=4118
+			var test1 = new String('abc');  // eslint-disable-line
+			test1[5] = 'de';
+			if (Object.getOwnPropertyNames(test1)[0] === '5') {
+				return false;
+			}
+
+			// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+			var test2 = {};
+			for (var i = 0; i < 10; i++) {
+				test2['_' + String.fromCharCode(i)] = i;
+			}
+			var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+				return test2[n];
+			});
+			if (order2.join('') !== '0123456789') {
+				return false;
+			}
+
+			// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+			var test3 = {};
+			'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+				test3[letter] = letter;
+			});
+			if (Object.keys(Object.assign({}, test3)).join('') !==
+					'abcdefghijklmnopqrst') {
+				return false;
+			}
+
+			return true;
+		} catch (e) {
+			// We don't expect any of the above to throw, but better to be safe.
+			return false;
+		}
+	}
+
+	module.exports = shouldUseNative() ? Object.assign : function (target, source) {
+		var from;
+		var to = toObject(target);
+		var symbols;
+
+		for (var s = 1; s < arguments.length; s++) {
+			from = Object(arguments[s]);
+
+			for (var key in from) {
+				if (hasOwnProperty.call(from, key)) {
+					to[key] = from[key];
+				}
+			}
+
+			if (Object.getOwnPropertySymbols) {
+				symbols = Object.getOwnPropertySymbols(from);
+				for (var i = 0; i < symbols.length; i++) {
+					if (propIsEnumerable.call(from, symbols[i])) {
+						to[symbols[i]] = from[symbols[i]];
+					}
+				}
+			}
+		}
+
+		return to;
+	};
 
 
 /***/ }
