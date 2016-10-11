@@ -4,8 +4,9 @@
 
 require('./reset.css');
 
-import  {Debugger} from '../lib/debuggerjs'
-
+//var Debugger = require('../../debuggerjs');
+import  Debugger from '../../debuggerjs';
+console.log(Debugger);
 document.addEventListener('click', function (e) {
     alert(a);
 });
