@@ -134,8 +134,7 @@ class DebuggerInstance {
         return cssText;
     }
 }
-
-export const Debugger = {
+const Debugger = {
 
     errorCount: 1,
 
@@ -263,3 +262,4 @@ export const Debugger = {
     }
 
 };
+export default Debugger;
