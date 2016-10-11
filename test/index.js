@@ -4,7 +4,8 @@
 
 require('./reset.css');
 
-import  {Debugger} from '../src/debuggerjs'
+import  {Debugger} from '../lib/debuggerjs'
+
 document.addEventListener('click', function (e) {
     alert(a);
 });
@@ -56,7 +57,7 @@ function ajax(opt) {
 }
 window.onload = function () {
     Debugger.init({
-        needShow: false,
+        needShow: true,
         needReport: true,
         method: 'post',
         url: 'http://127.0.0.1:3000/add'
