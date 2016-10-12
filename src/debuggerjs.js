@@ -10,32 +10,50 @@ class DebuggerInstance {
         this.errLocation = {};
         this.create(error);
         this.sendErrorData(error);
-
     }
 
     create(error) {
-        let me = this;
         if (!error.needShow) return;
 
+        this.createWraper();
+        this.createContent(error);
+    }
+
+    createWraper(){
+        let me = this;
+
+        if(!Debugger.wraper){
+            let style = me.parseCSS();
+            let timeStamp = +new Date();
+            let alertBox = document.createElement('div');
+            alertBox.id = 'debugger-' + timeStamp;
+            alertBox.style.cssText = style.wrapCss;
+            alertBox.onclick = function () {
+                Debugger.showWraper ? me.hideWraper() : me.showWraper();
+            };
+            Debugger.wraper = alertBox;
+
+            document.body.appendChild(alertBox);
+        }
+    }
+
+    createContent(error){
+        let me = this;
         let style = me.parseCSS();
         let count = Debugger.errorCount;
-        let timeStamp = +new Date();
-        let content = `
-            <div style="${style.contentCss}">err${count}: ${error.message}<br/>location: ${error.location}</div>
-            `;
-        let alertBox = document.createElement('div');
-        alertBox.id = 'debugger-' + timeStamp;
-        alertBox.style = style.wrapCss;
-        alertBox.innerHTML = content;
 
-        me.instance = alertBox;
+        let content = document.createElement('div');
+        content.style.cssText = style.contentCss;
+        content.innerHTML = `err${count}: ${error.message}<br/>location: ${error.location}`;
 
-        document.body.appendChild(alertBox);
+        me.instance = content;
+
+        Debugger.wraper.appendChild(content);
 
         Debugger.errorCount++;
 
         setTimeout(function () {
-            me.destroy();
+            // me.destroy();
         }, 10000)
     }
 
@@ -67,6 +85,21 @@ class DebuggerInstance {
 
     }
 
+    showWraper(){
+        if(!Debugger.wraper) return;
+        Debugger.wraper.style.transform = 'translateY(0px)';
+        Debugger.wraper.style.webkitTransform = 'translateY(0px)';
+        Debugger.showWraper = true;
+    }
+
+    hideWraper(){
+        if(!Debugger.wraper) return;
+        let me = this;
+        let wrapHeight = me.getCssValue(Debugger.wraper, 'height');
+        Debugger.wraper.style.transform = 'translateY(' + (parseFloat(wrapHeight) - 5) +'px)';
+        Debugger.wraper.style.webkitTransform = 'translateY(' + (parseFloat(wrapHeight) - 5) +'px)';
+        Debugger.showWraper = false;
+    }
     sendErrorData(error) {
         if (!error.needReport) return;
 
@@ -91,8 +124,8 @@ class DebuggerInstance {
 
     parseCSS(){
         let wrapCss, contentCss;
-        wrapCss = "position: relative; opacity: 1; word-wrap: break-word;";
-        contentCss = "background: rgba(0, 0, 0, 0.6);font-size: 1rem;color: #fff;line-height: 1.2;padding: 0.5rem 10% 0.5rem 0.5rem;border-bottom: 1px solid #f0f0f0;";
+        wrapCss = "position: fixed; bottom:0; opacity: 1; word-wrap: break-word;transform: translateY(0px);-webkit-transform: translateY(0px);transition: transform 0.3s ease;-webkit-transition: -webkit-transform 0.3s ease;";
+        contentCss = "background: rgba(0, 0, 0, 0.6);color: #fff;line-height: 1.2;padding: 0.5rem;border-bottom: 1px solid #f0f0f0;";
         return {wrapCss, contentCss}
     }
     getCssValue(target, attr) {
@@ -124,6 +157,10 @@ class DebuggerInstance {
     }
 }
 const Debugger = {
+
+    wraper: null,
+
+    showWraper: true,
 
     errorCount: 1,
 

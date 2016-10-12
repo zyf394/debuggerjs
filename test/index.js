@@ -4,8 +4,8 @@
 
 require('./reset.css');
 
-//var Debugger = require('../../debuggerjs');
-import  Debugger from '../../debuggerjs';
+var Debugger = require('../../debuggerjs');
+// import  Debugger from '../../debuggerjs';
 Debugger.init();
 document.addEventListener('click', function (e) {
     alert(a);
@@ -14,7 +14,7 @@ document.addEventListener('click', function (e) {
 
 function loadErrorScript() {
     var script = document.createElement('script');
-    script.src = '/kkk.js';
+    script.src = '/badScript.js';
     script.onerror = function (error) {
         Debugger.log(error)
     };
@@ -22,7 +22,7 @@ function loadErrorScript() {
 }
 function loadErrorLink() {
     var link = document.createElement('link');
-    link.href = '/kkk.css';
+    link.href = '/badCss.css';
     link.rel = 'stylesheet';
     link.onerror = function (error) {
         console.log(error);
@@ -43,6 +43,7 @@ function loadErrorAjax() {
         }
     })
 }
+
 function ajax(opt) {
     var xhr = new XMLHttpRequest();
     xhr.open(opt.type, opt.url, opt.async);
