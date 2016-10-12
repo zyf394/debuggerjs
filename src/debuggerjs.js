@@ -122,17 +122,6 @@ class DebuggerInstance {
         this.locationObj = {filename, lineno, colno} // for cache
         return this.locationObj
     }
-
-    compileToCss(obj) {
-        let cssText = '';
-        for (let key in obj) {
-            let cssKey = key.replace(/([A-Z])/g, "-$1").toLowerCase();
-            let cssVal = obj[key];
-            cssText += (cssKey + ':' + cssVal + ';')
-        }
-
-        return cssText;
-    }
 }
 const Debugger = {
 

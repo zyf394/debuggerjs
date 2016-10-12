@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack-dev-server -d --content-base test/ --hot --progress --colors --port 7777",
-    "build": "rimraf lib && babel src --source-maps --extensions .js --out-dir lib"
+    "build": "rimraf lib && babel src --copy-files --source-maps --extensions .js --out-dir lib && rimraf lib/debuggerjs.less"
   },
   "devDependencies": {
     "babel-core": "^6.9.0",
