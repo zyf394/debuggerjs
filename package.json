@@ -1,11 +1,11 @@
 {
   "name": "debuggerjs",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "a small debugger for web in Native App",
   "main": "index.js",
   "scripts": {
     "dev": "webpack-dev-server -d --content-base test/ --hot --progress --colors --port 7777",
-    "build": "rimraf lib && babel src --copy-files --source-maps --extensions .js --out-dir lib && rimraf lib/debuggerjs.less"
+    "build": "rimraf lib && babel src --copy-files --source-maps --extensions .js --out-dir lib"
   },
   "devDependencies": {
     "babel-core": "^6.9.0",
