@@ -11,7 +11,6 @@ document.addEventListener('click', function (e) {
     alert(a);
 });
 
-
 function loadErrorScript() {
     var script = document.createElement('script');
     script.src = '/badScript.js';
@@ -28,6 +27,7 @@ function loadErrorLink() {
         console.log(error);
         Debugger.log(error)
     };
+
     document.head.appendChild(link);
 }
 function loadErrorAjax() {
@@ -43,7 +43,6 @@ function loadErrorAjax() {
         }
     })
 }
-
 function ajax(opt) {
     var xhr = new XMLHttpRequest();
     xhr.open(opt.type, opt.url, opt.async);

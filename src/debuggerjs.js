@@ -44,7 +44,10 @@ class DebuggerInstance {
 
         let content = document.createElement('div');
         content.style.cssText = style.contentCss;
-        content.innerHTML = `err${count}: ${error.message}<br/>location: ${error.location}`;
+        content.innerHTML = `
+            <span style="${style.errNoCss}"> err${count}: </span> ${error.message}
+            <br/>
+            <span style="${style.locationCss}"> location: </span> ${error.location.replace(/(<anonymous>)|(<\/anonymous>)/ig,'')}`;
 
         me.instance = content;
 
@@ -123,10 +126,12 @@ class DebuggerInstance {
     }
 
     parseCSS(){
-        let wrapCss, contentCss;
-        wrapCss = "position: fixed; bottom:0; opacity: 1; word-wrap: break-word;transform: translateY(0px);-webkit-transform: translateY(0px);transition: transform 0.3s ease;-webkit-transition: -webkit-transform 0.3s ease;";
-        contentCss = "background: rgba(0, 0, 0, 0.6);color: #fff;line-height: 1.2;padding: 0.5rem;border-bottom: 1px solid #f0f0f0;";
-        return {wrapCss, contentCss}
+        let wrapCss, contentCss, errNoCss, locationCss;
+        wrapCss = "position: fixed; bottom:0; box-sizing:border-box; opacity: 1; word-wrap: break-word;word-break: break-all; transform: translateY(0px);-webkit-transform: translateY(0px);transition: transform 0.3s ease;-webkit-transition: -webkit-transform 0.3s ease;";
+        contentCss = "background: rgba(0, 0, 0, 0.6);color: #fff;line-height: 1.2;padding: 0.5rem;box-sizing:border-box; border-bottom: 1px solid #f0f0f0;";
+        errNoCss = "background: #bd362f; color:#fff; padding-left:0.2rem; margin-right:0.2rem";
+        locationCss = "background: #0074cc; color:#fff; padding-left:0.2rem; margin-right:0.2rem";
+        return {wrapCss, contentCss, errNoCss, locationCss}
     }
     getCssValue(target, attr) {
         return window.getComputedStyle(target)[attr]
