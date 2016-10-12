@@ -1,8 +1,6 @@
 /**
  * Created by didi on 16/9/21.
  */
-
-import styles from './debuggerjs.less';
 import ajax from '@fdaciuk/ajax';
 import objectAssign from 'object-assign';
 
@@ -10,13 +8,8 @@ class DebuggerInstance {
     constructor(error) {
         this.instance = null;
         this.errLocation = {};
-
-
-        this.sendErrorData(error);
         this.create(error);
-    }
-
-    getDefaultData() {
+        this.sendErrorData(error);
 
     }
 
@@ -24,14 +17,15 @@ class DebuggerInstance {
         let me = this;
         if (!error.needShow) return;
 
+        let style = me.parseCSS();
         let count = Debugger.errorCount;
         let timeStamp = +new Date();
         let content = `
-            <div >err${count}: ${error.message}<br/>location: ${error.location}</div>
+            <div style="${style.contentCss}">err${count}: ${error.message}<br/>location: ${error.location}</div>
             `;
         let alertBox = document.createElement('div');
         alertBox.id = 'debugger-' + timeStamp;
-        alertBox.className = styles.debugger;
+        alertBox.style = style.wrapCss;
         alertBox.innerHTML = content;
 
         me.instance = alertBox;
@@ -95,6 +89,12 @@ class DebuggerInstance {
         })
     }
 
+    parseCSS(){
+        let wrapCss, contentCss;
+        wrapCss = "position: relative; opacity: 1; word-wrap: break-word;";
+        contentCss = "background: rgba(0, 0, 0, 0.6);font-size: 1rem;color: #fff;line-height: 1.2;padding: 0.5rem 10% 0.5rem 0.5rem;border-bottom: 1px solid #f0f0f0;";
+        return {wrapCss, contentCss}
+    }
     getCssValue(target, attr) {
         return window.getComputedStyle(target)[attr]
     }
@@ -146,10 +146,14 @@ const Debugger = {
     },
 
     init(options) {
+        let me = this;
+
         if (options) {
-            this.confData = objectAssign(this.confData, options)
+            me.confData = objectAssign(me.confData, options)
         }
-        this.listenScriptError();
+        window.addEventListener('load',function () {
+            me.listenScriptError();
+        })
     },
 
     listenScriptError(){

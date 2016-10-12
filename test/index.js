@@ -6,10 +6,11 @@ require('./reset.css');
 
 //var Debugger = require('../../debuggerjs');
 import  Debugger from '../../debuggerjs';
-console.log(Debugger);
+Debugger.init();
 document.addEventListener('click', function (e) {
     alert(a);
 });
+
 
 function loadErrorScript() {
     var script = document.createElement('script');
@@ -57,12 +58,6 @@ function ajax(opt) {
     xhr.send();
 }
 window.onload = function () {
-    Debugger.init({
-        needShow: true,
-        needReport: true,
-        method: 'post',
-        url: 'http://127.0.0.1:3000/add'
-    });
     Debugger.log('Debugger begins.');
     try {
         console.log(i)

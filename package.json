@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack-dev-server -d --content-base test/ --hot --progress --colors --port 7777",
-    "build": "rimraf lib && babel src --copy-files --source-maps --extensions .js --out-dir lib"
+    "build": "rimraf lib && babel src --source-maps --extensions .js --out-dir lib"
   },
   "devDependencies": {
     "babel-core": "^6.9.0",
@@ -35,6 +35,9 @@
   "homepage": "https://github.com/zyf394/debuggerjs#readme",
   "dependencies": {
     "@fdaciuk/ajax": "^2.1.2",
-    "object-assign": "^4.1.0"
+    "css-js": "^1.0.6",
+    "css-modules-require-hook": "^4.0.5",
+    "object-assign": "^4.1.0",
+    "postcss-js": "^0.1.3"
   }
 }
