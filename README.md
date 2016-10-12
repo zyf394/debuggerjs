@@ -13,19 +13,19 @@ So this is what I've done.
     
 ## usage
 
-    var debuger = require('debuggerjs'); // It is named as debuger in case of mixed with 'debugger' keyword.
+    var debug = require('debuggerjs'); 
     
     or use es6
     
-    import debuger from 'debuggerjs';
+    import debug from 'debuggerjs';
         
 ## API
 
-#### debuger.init(options)
-use debuger.init(options) to listen all javascript code running error.
+#### debug.init(options)
+use debug.init(options) to listen all javascript code running error.
 
-    import debuger from 'debuggerjs';
-    debugger.init(options);
+    import debug from 'debuggerjs';
+    debug.init(options);
 
 **options** 
 
@@ -38,13 +38,13 @@ use debuger.init(options) to listen all javascript code running error.
 
 
 #### debuger.log(error)
-or you can use debuger.log() to log errors manually. The only param could be a Error object or a String.
+or you can use debug.log() to log errors manually. The only param could be a Error object or a String.
 
     var script = document.createElement('script');
         script.src = '/somethingBad.js';
         script.onerror = function (error) {
-            debuger.log(error);
-            debuger.log('write whatever you want to show');
+            debug.log(error);
+            debug.log('write whatever you want to show');
         };
         
     document.body.appendChild(script);
