@@ -49,3 +49,5 @@ or you can use debug.log() to log errors manually. The only param could be a Err
         
     document.body.appendChild(script);
     
+#### example
+
