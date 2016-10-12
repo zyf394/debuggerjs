@@ -17,14 +17,14 @@ So this is what I've done.
     
     or use es6
     
-    import {debuger} from 'debuggerjs';
+    import debuger from 'debuggerjs';
         
 ## API
 
 #### debuger.init(options)
 use debuger.init(options) to listen all javascript code running error.
 
-    import {debuger} from 'debuggerjs';
+    import debuger from 'debuggerjs';
     debugger.init(options);
 
 **options** 
