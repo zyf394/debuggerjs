@@ -1,6 +1,6 @@
 {
   "name": "debuggerjs",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "a small debugger for web in Native App",
   "main": "index.js",
   "scripts": {
