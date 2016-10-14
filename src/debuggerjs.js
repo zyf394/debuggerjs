@@ -1,6 +1,7 @@
 /**
  * Created by didi on 16/9/21.
  */
+import Promise from 'bluebird'
 import ajax from '@fdaciuk/ajax';
 import objectAssign from 'object-assign';
 
@@ -13,7 +14,7 @@ class DebuggerInstance {
     }
 
     create(error) {
-        if (!error.needShow) return;
+        if (error.needShowv === false ) return;
 
         this.createWraper();
         this.createContent(error);
@@ -28,9 +29,12 @@ class DebuggerInstance {
             let alertBox = document.createElement('div');
             alertBox.id = 'debugger-' + timeStamp;
             alertBox.style.cssText = style.wrapCss;
-            alertBox.onclick = function () {
+            alertBox.addEventListener('click', function () {
                 Debugger.showWraper ? me.hideWraper() : me.showWraper();
-            };
+            });
+            alertBox.addEventListener('touchmove', function(e){
+                e.stopPropagation();
+            });
             Debugger.wraper = alertBox;
 
             document.body.appendChild(alertBox);
@@ -100,8 +104,8 @@ class DebuggerInstance {
         if(!Debugger.wraper) return;
         let me = this;
         let wrapHeight = me.getCssValue(Debugger.wraper, 'height');
-        Debugger.wraper.style.transform = 'translateY(' + (parseFloat(wrapHeight) - 5) +'px)';
-        Debugger.wraper.style.webkitTransform = 'translateY(' + (parseFloat(wrapHeight) - 5) +'px)';
+        Debugger.wraper.style.transform = 'translateY(' + (parseFloat(wrapHeight) - 20) +'px)';
+        Debugger.wraper.style.webkitTransform = 'translateY(' + (parseFloat(wrapHeight) - 20) +'px)';
         Debugger.showWraper = false;
     }
     sendErrorData(error) {
@@ -128,7 +132,7 @@ class DebuggerInstance {
 
     parseCSS(){
         let wrapCss, contentCss, errNoCss, locationCss, hrCss;
-        wrapCss = "position: fixed; bottom:0; box-sizing:border-box; opacity: 1; word-wrap: break-word;word-break: break-all; transform: translateY(0px);-webkit-transform: translateY(0px);transition: transform 0.3s ease;-webkit-transition: -webkit-transform 0.3s ease;";
+        wrapCss = "position: fixed; bottom:0; max-height:100%; overflow:scroll; box-sizing:border-box; opacity: 1; word-wrap: break-word;word-break: break-all; transform: translateY(0px);-webkit-transform: translateY(0px);transition: transform 0.3s ease;-webkit-transition: -webkit-transform 0.3s ease;";
         contentCss = "background: rgba(0, 0, 0, 0.6);color: #fff;line-height: 1.2;padding: 0.5rem;box-sizing:border-box; border-bottom: 1px solid #f0f0f0;";
         errNoCss = "background: #bd362f; border-radius:4px; color:#fff; padding-left:0.2rem; margin-right:0.2rem";
         locationCss = "background: #0074cc; border-radius:4px; color:#fff; padding-left:0.2rem; margin-right:0.2rem";

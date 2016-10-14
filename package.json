@@ -1,11 +1,11 @@
 {
   "name": "debuggerjs",
-  "version": "1.0.12",
+  "version": "1.0.18",
   "description": "a small debugger for web in Native App",
   "main": "index.js",
   "scripts": {
     "dev": "webpack-dev-server -d --content-base test/ --hot --progress --colors --port 7777",
-    "build": "rimraf lib && babel src --copy-files --source-maps --extensions .js --out-dir lib"
+    "build": "rimraf lib && babel src --copy-files --extensions .js --out-dir lib"
   },
   "devDependencies": {
     "babel-core": "^6.9.0",
@@ -34,6 +34,7 @@
   "homepage": "https://github.com/zyf394/debuggerjs#readme",
   "dependencies": {
     "@fdaciuk/ajax": "^2.1.2",
+    "bluebird": "^3.4.6",
     "object-assign": "^4.1.0"
   }
 }

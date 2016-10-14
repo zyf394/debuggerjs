@@ -7,6 +7,7 @@ require('./reset.css');
 var Debugger = require('../../debuggerjs');
 // import  Debugger from '../../debuggerjs';
 Debugger.init();
+
 document.addEventListener('click', function (e) {
     alert(a);
 });
