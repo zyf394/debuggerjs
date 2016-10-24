@@ -4,12 +4,13 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     entry: {
-        test:"./test/index.js",
-        zepto:"./test/zepto.js"
+        test: "./test/index.js",
+        zepto: "./test/zepto.js"
     },
     output: {
         path: "./test/",
-        filename: "/[name].min.js"
+        filename: "/[name].js",
+        sourceMapFilename: "[name].map"
     },
     module: {
         loaders: [
@@ -32,12 +33,20 @@ module.exports = {
         ]
     },
     plugins: [
+        new webpack.optimize.UglifyJsPlugin({
+            compress: {
+                warnings: false
+            },
+            comments: false,
+            sourceMap: true
+        }),
         new HtmlWebpackPlugin({
-        title: 'debbger',
-        template: './test/index.html',
-        filename: './index.html',
-        inject: true,
-        chunks: ["test","zepto"]
-    })
-    ]
+            title: 'debbger',
+            template: './test/index.html',
+            filename: './index.html',
+            inject: true,
+            chunks: ["test", "zepto"]
+        })
+    ],
+    devtool: "#source-map"
 };

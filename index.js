@@ -1,1 +1,1 @@
-module.exports = require('./lib/debuggerjs').default;
+module.exports = require('./lib/debuggerjs.min.js').default;

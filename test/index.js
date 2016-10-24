@@ -45,7 +45,6 @@ function loadErrorAjax() {
         }
     })
 }
-
 function ajax(opt) {
     var xhr = new XMLHttpRequest();
     xhr.open(opt.type, opt.url, opt.async);
